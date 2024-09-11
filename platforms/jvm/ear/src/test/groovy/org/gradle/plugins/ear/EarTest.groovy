@@ -21,6 +21,7 @@ import org.gradle.api.file.CopySpec
 import org.gradle.api.plugins.JavaBasePlugin
 import org.gradle.api.tasks.bundling.AbstractArchiveTask
 import org.gradle.api.tasks.bundling.AbstractArchiveTaskTest
+import org.gradle.internal.file.PathToFileResolver
 import org.gradle.plugins.ear.descriptor.DeploymentDescriptor
 import org.gradle.plugins.ear.descriptor.EarSecurityRole
 import org.gradle.plugins.ear.descriptor.internal.DefaultDeploymentDescriptor
@@ -28,6 +29,7 @@ import org.gradle.test.fixtures.archive.JarTestFixture
 
 class EarTest extends AbstractArchiveTaskTest {
     Ear ear
+    PathToFileResolver nullPathToFileResolver = Stub(PathToFileResolver)
 
     def setup() {
         ear = createTask(Ear)
@@ -48,7 +50,7 @@ class EarTest extends AbstractArchiveTaskTest {
 
     def "correct default deployment descriptor"() {
         when:
-        ear.deploymentDescriptor = objectFactory.newInstance(DefaultDeploymentDescriptor, null, objectFactory)
+        ear.deploymentDescriptor = objectFactory.newInstance(DefaultDeploymentDescriptor, nullPathToFileResolver, objectFactory)
         def d = makeDeploymentDescriptor(ear)
 
         then:
@@ -129,17 +131,17 @@ class EarTest extends AbstractArchiveTaskTest {
         assert d.initializeInOrder.get()
         assert d.displayName.get() == "My App"
         assert d.description.get() == "My Application"
-        assert d.libraryDirectory == "APP-INF/lib"
+        assert d.libraryDirectory.get() == "APP-INF/lib"
         assert d.modules.get().size() == 2
-        assert d.modules.get()[0].path == "my.jar"
-        assert d.modules.get()[1].path == "my.war"
-        assert d.modules.get()[1].contextRoot == "/"
+        assert d.modules.get()[0].path.get() == "my.jar"
+        assert d.modules.get()[1].path.get() == "my.war"
+        assert d.modules.get()[1].contextRoot.get() == "/"
         assert d.moduleTypeMappings.get()["my.jar"] == "java"
         assert d.moduleTypeMappings.get()["my.war"] == "web"
         assert d.securityRoles.get().size() == 2
-        assert d.securityRoles.get()[0].roleName == "admin"
-        assert d.securityRoles.get()[1].roleName == "superadmin"
-        assert d.securityRoles.get()[1].description == "Super Admin Role"
+        assert d.securityRoles.get()[0].roleName.get() == "admin"
+        assert d.securityRoles.get()[1].roleName.get() == "superadmin"
+        assert d.securityRoles.get()[1].description.get() == "Super Admin Role"
         assert d.transformer.actions.size() == 1
     }
 }

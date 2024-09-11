@@ -133,13 +133,13 @@ public abstract class DefaultDeploymentDescriptor implements DeploymentDescripto
 
     @Override
     public DeploymentDescriptor securityRole(String role) {
-        getSecurityRoles().add(new DefaultEarSecurityRole(role));
+        getSecurityRoles().add(newDefaultEarSecurityRole(role, null));
         return this;
     }
 
     @Override
     public DeploymentDescriptor securityRole(Action<? super EarSecurityRole> action) {
-        EarSecurityRole role = objectFactory.newInstance(DefaultEarSecurityRole.class);
+        EarSecurityRole role = newDefaultEarSecurityRole(null, null);
         action.execute(role);
         getSecurityRoles().add(role);
         return this;
@@ -253,7 +253,7 @@ public abstract class DefaultDeploymentDescriptor implements DeploymentDescripto
 
                         String roleName = childNodeText(child, "role-name");
                         String description = childNodeText(child, "description");
-                        getSecurityRoles().add(new DefaultEarSecurityRole(roleName, description));
+                        getSecurityRoles().add(newDefaultEarSecurityRole(roleName, description));
 
                         break;
                     default:
@@ -287,6 +287,13 @@ public abstract class DefaultDeploymentDescriptor implements DeploymentDescripto
         DefaultEarModule module = objectFactory.newInstance(DefaultEarModule.class);
         module.getPath().set(path);
         return module;
+    }
+
+    private DefaultEarSecurityRole newDefaultEarSecurityRole(String roleName, String description) {
+        DefaultEarSecurityRole role = objectFactory.newInstance(DefaultEarSecurityRole.class);
+        role.getRoleName().set(roleName);
+        role.getDescription().set(description);
+        return role;
     }
 
     private static String childNodeText(Node root, String name) {
