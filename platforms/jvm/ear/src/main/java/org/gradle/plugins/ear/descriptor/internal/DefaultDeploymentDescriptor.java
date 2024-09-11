@@ -115,17 +115,12 @@ public abstract class DefaultDeploymentDescriptor implements DeploymentDescripto
 
     @Override
     public DefaultDeploymentDescriptor module(String path, String type) {
-        DefaultEarModule module = objectFactory.newInstance(DefaultEarModule.class);
-        module.getPath().set(path);
-        return module(module, type);
+        return module(newDefaultEarModule(path), type);
     }
 
     @Override
     public DefaultDeploymentDescriptor webModule(String path, String contextRoot) {
-        DefaultEarWebModule module = objectFactory.newInstance(DefaultEarWebModule.class);
-        module.setContextRoot(contextRoot);
-        module.getPath().set(path);
-        getModules().add(module);
+        getModules().add(newDefaultEarWebModule(path, contextRoot));
         getModuleTypeMappings().put(path, "web");
         return this;
     }
@@ -237,9 +232,11 @@ public abstract class DefaultDeploymentDescriptor implements DeploymentDescripto
                             if (moduleNodeLocalName.equals("web")) {
                                 String webUri = childNodeText(moduleNode, "web-uri");
                                 String contextRoot = childNodeText(moduleNode, "context-root");
-                                module = newDefaultEarWebModule(webUri, contextRoot);
-                                getModules().add(module);
-                                getModuleTypeMappings().put(module.getPath().get(), "web");
+                                if (webUri != null && contextRoot != null) {
+                                    module = newDefaultEarWebModule(webUri, contextRoot);
+                                    getModules().add(module);
+                                    getModuleTypeMappings().put(webUri, "web");
+                                }
                             } else if (moduleNodeLocalName.equals("alt-dd")) {
                                 assert module != null;
                                 module.getAltDeployDescriptor().set(moduleNode.text());
@@ -282,7 +279,7 @@ public abstract class DefaultDeploymentDescriptor implements DeploymentDescripto
     private DefaultEarWebModule newDefaultEarWebModule(String path, String contextRoot) {
         DefaultEarWebModule module = objectFactory.newInstance(DefaultEarWebModule.class);
         module.getPath().set(path);
-        module.setContextRoot(contextRoot);
+        module.getContextRoot().set(contextRoot);
         return module;
     }
 
