@@ -14,7 +14,6 @@ errorprone {
 dependencies {
     api(libs.groovy)
     api(libs.inject)
-    api(libs.jsr305)
 
     api(projects.baseServices)
     api(projects.coreApi)

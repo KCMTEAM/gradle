@@ -32,17 +32,16 @@ import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.bundling.Jar;
 import org.gradle.internal.execution.OutputChangeListener;
-import org.gradle.internal.instrumentation.api.annotations.ToBeReplacedByLazyProperty;
+import org.gradle.internal.instrumentation.api.annotations.NotToBeReplacedByLazyProperty;
+import org.gradle.internal.instrumentation.api.annotations.ReplacesEagerProperty;
 import org.gradle.plugins.ear.descriptor.DeploymentDescriptor;
 import org.gradle.plugins.ear.descriptor.EarModule;
 import org.gradle.plugins.ear.descriptor.internal.DefaultDeploymentDescriptor;
 import org.gradle.plugins.ear.descriptor.internal.DefaultEarModule;
 import org.gradle.plugins.ear.descriptor.internal.DefaultEarWebModule;
 import org.gradle.util.internal.ConfigureUtil;
-import org.gradle.util.internal.GUtil;
 import org.gradle.work.DisableCachingByDefault;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.OutputStreamWriter;
@@ -60,10 +59,9 @@ import static org.gradle.plugins.ear.EarPlugin.DEFAULT_LIB_DIR_NAME;
 public abstract class Ear extends Jar {
     public static final String EAR_EXTENSION = "ear";
 
-    private String libDirName;
     private final Property<Boolean> generateDeploymentDescriptor;
     private DeploymentDescriptor deploymentDescriptor;
-    private CopySpec lib;
+    private final CopySpec lib;
     private final DirectoryProperty appDir;
 
     public Ear() {
@@ -71,9 +69,7 @@ public abstract class Ear extends Jar {
         setMetadataCharset("UTF-8");
         generateDeploymentDescriptor = getObjectFactory().property(Boolean.class);
         generateDeploymentDescriptor.convention(true);
-        lib = getRootSpec().addChildBeforeSpec(getMainSpec()).into(
-            callable(() -> GUtil.elvis(getLibDirName(), DEFAULT_LIB_DIR_NAME))
-        );
+        lib = getRootSpec().addChildBeforeSpec(getMainSpec()).into(getLibDirName().orElse(DEFAULT_LIB_DIR_NAME));
         getMainSpec().appendCachingSafeCopyAction(action(details -> {
             if (generateDeploymentDescriptor.get()) {
                 checkIfShouldGenerateDeploymentDescriptor(details);
@@ -91,7 +87,7 @@ public abstract class Ear extends Jar {
             final DeploymentDescriptor descriptor = getDeploymentDescriptor();
             if (descriptor != null && generateDeploymentDescriptor.get()) {
                 if (descriptor.getLibraryDirectory() == null) {
-                    descriptor.setLibraryDirectory(getLibDirName());
+                    descriptor.setLibraryDirectory(getLibDirName().getOrNull());
                 }
 
                 String descriptorFileName = descriptor.getFileName();
@@ -199,7 +195,7 @@ public abstract class Ear extends Jar {
      * A location for dependency libraries to include in the 'lib' directory of the EAR archive.
      */
     @Internal
-    @ToBeReplacedByLazyProperty(comment = "Should this be lazy?")
+    @NotToBeReplacedByLazyProperty(because = "Nested property")
     public CopySpec getLib() {
         return ((CopySpecInternal) lib).addChild();
     }
@@ -234,17 +230,10 @@ public abstract class Ear extends Jar {
     /**
      * The name of the library directory in the EAR file. Default is "lib".
      */
-    @Nullable
     @Optional
     @Input
-    @ToBeReplacedByLazyProperty
-    public String getLibDirName() {
-        return libDirName;
-    }
-
-    public void setLibDirName(@Nullable String libDirName) {
-        this.libDirName = libDirName;
-    }
+    @ReplacesEagerProperty
+    public abstract Property<String> getLibDirName();
 
     /**
      * Should deploymentDescriptor be generated?
@@ -260,7 +249,7 @@ public abstract class Ear extends Jar {
      * The deployment descriptor configuration.
      */
     @Internal
-    @ToBeReplacedByLazyProperty
+    @NotToBeReplacedByLazyProperty(because = "Nested property")
     public DeploymentDescriptor getDeploymentDescriptor() {
         return deploymentDescriptor;
     }
