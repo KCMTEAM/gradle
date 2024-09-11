@@ -48,7 +48,7 @@ class EarTest extends AbstractArchiveTaskTest {
 
     def "correct default deployment descriptor"() {
         when:
-        ear.deploymentDescriptor = new DefaultDeploymentDescriptor(null, objectFactory)
+        ear.deploymentDescriptor = objectFactory.newInstance(DefaultDeploymentDescriptor, null, objectFactory)
         def d = makeDeploymentDescriptor(ear)
 
         then:
@@ -71,7 +71,7 @@ class EarTest extends AbstractArchiveTaskTest {
         } as Action<DeploymentDescriptor>)
 
         then:
-        ear.deploymentDescriptor.applicationName == "myapp"
+        ear.deploymentDescriptor.applicationName.get() == "myapp"
     }
 
     def "can configure ear lib copyspec using an Action"() {
@@ -124,22 +124,22 @@ class EarTest extends AbstractArchiveTaskTest {
 
     private static void checkDeploymentDescriptor(DeploymentDescriptor d) {
         assert d.fileName == "myApp.xml"
-        assert d.version == "5"
-        assert d.applicationName == "myapp"
-        assert d.initializeInOrder
-        assert d.displayName == "My App"
-        assert d.description == "My Application"
+        assert d.version.get() == "5"
+        assert d.applicationName.get() == "myapp"
+        assert d.initializeInOrder.get()
+        assert d.displayName.get() == "My App"
+        assert d.description.get() == "My Application"
         assert d.libraryDirectory == "APP-INF/lib"
-        assert d.modules.size() == 2
-        assert d.modules[0].path == "my.jar"
-        assert d.modules[1].path == "my.war"
-        assert d.modules[1].contextRoot == "/"
-        assert d.moduleTypeMappings["my.jar"] == "java"
-        assert d.moduleTypeMappings["my.war"] == "web"
-        assert d.securityRoles.size() == 2
-        assert d.securityRoles[0].roleName == "admin"
-        assert d.securityRoles[1].roleName == "superadmin"
-        assert d.securityRoles[1].description == "Super Admin Role"
+        assert d.modules.get().size() == 2
+        assert d.modules.get()[0].path == "my.jar"
+        assert d.modules.get()[1].path == "my.war"
+        assert d.modules.get()[1].contextRoot == "/"
+        assert d.moduleTypeMappings.get()["my.jar"] == "java"
+        assert d.moduleTypeMappings.get()["my.war"] == "web"
+        assert d.securityRoles.get().size() == 2
+        assert d.securityRoles.get()[0].roleName == "admin"
+        assert d.securityRoles.get()[1].roleName == "superadmin"
+        assert d.securityRoles.get()[1].description == "Super Admin Role"
         assert d.transformer.actions.size() == 1
     }
 }

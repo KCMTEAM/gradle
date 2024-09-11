@@ -15,6 +15,7 @@
  */
 package org.gradle.plugins.ear;
 
+import com.google.common.collect.Sets;
 import groovy.lang.Closure;
 import groovy.lang.DelegatesTo;
 import org.gradle.api.Action;
@@ -45,7 +46,10 @@ import org.gradle.work.DisableCachingByDefault;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.OutputStreamWriter;
+import java.util.LinkedHashSet;
 import java.util.Locale;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static java.util.Collections.singleton;
 import static org.gradle.api.internal.lambdas.SerializableLambdas.action;
@@ -70,10 +74,11 @@ public abstract class Ear extends Jar {
         generateDeploymentDescriptor = getObjectFactory().property(Boolean.class);
         generateDeploymentDescriptor.convention(true);
         lib = getRootSpec().addChildBeforeSpec(getMainSpec()).into(getLibDirName().orElse(DEFAULT_LIB_DIR_NAME));
+        AtomicReference<Set<EarModule>> topLevelModules = new AtomicReference<>(new LinkedHashSet<>());
         getMainSpec().appendCachingSafeCopyAction(action(details -> {
             if (generateDeploymentDescriptor.get()) {
                 checkIfShouldGenerateDeploymentDescriptor(details);
-                recordTopLevelModules(details);
+                topLevelModules.set(Sets.union(topLevelModules.get(), recordTopLevelModules(details)));
             }
         }));
 
@@ -86,14 +91,11 @@ public abstract class Ear extends Jar {
         descriptorChild.from(callable(() -> {
             final DeploymentDescriptor descriptor = getDeploymentDescriptor();
             if (descriptor != null && generateDeploymentDescriptor.get()) {
-                if (descriptor.getLibraryDirectory() == null) {
-                    descriptor.setLibraryDirectory(getLibDirName().getOrNull());
-                }
-
                 String descriptorFileName = descriptor.getFileName();
                 if (descriptorFileName.contains("/") || descriptorFileName.contains(File.separator)) {
                     throw new InvalidUserDataException("Deployment descriptor file name must be a simple name but was " + descriptorFileName);
                 }
+                descriptor.getLibraryDirectory().convention(getLibDirName());
 
                 // TODO: Consider capturing the `descriptor` as a spec
                 //  so any captured manifest attribute providers are re-evaluated
@@ -104,10 +106,14 @@ public abstract class Ear extends Jar {
                     getTemporaryDirFactory(),
                     descriptorFileName,
                     action(file -> outputChangeListener.invalidateCachesFor(singleton(file.getAbsolutePath()))),
-                    action(outputStream ->
-                        // delay obtaining contents to account for descriptor changes
-                        // (for instance, due to modules discovered)
-                        descriptor.writeTo(new OutputStreamWriter(outputStream))
+                    action(outputStream -> {
+                            // delay obtaining contents to account for descriptor changes
+                            // (for instance, due to modules discovered)
+                            // We copy the descriptor since properties are already finalized at that moment with cc
+                            DeploymentDescriptor copyDescriptor = getObjectFactory().newInstance(DefaultDeploymentDescriptor.class).copyFrom(descriptor);
+                            copyDescriptor.getModules().addAll(topLevelModules.get());
+                            copyDescriptor.writeTo(new OutputStreamWriter(outputStream));
+                        }
                     )
                 );
             }
@@ -126,7 +132,8 @@ public abstract class Ear extends Jar {
         return getServices().get(OutputChangeListener.class);
     }
 
-    private void recordTopLevelModules(FileCopyDetails details) {
+    private Set<EarModule> recordTopLevelModules(FileCopyDetails details) {
+        Set<EarModule> topLevelModules = new LinkedHashSet<>();
         DeploymentDescriptor deploymentDescriptor = getDeploymentDescriptor();
         // since we might generate the deployment descriptor, record each top-level module
         if (deploymentDescriptor != null && details.getPath().lastIndexOf("/") <= 0) {
@@ -137,8 +144,9 @@ public abstract class Ear extends Jar {
                 module = new DefaultEarModule(details.getPath());
             }
 
-            deploymentDescriptor.getModules().add(module);
+            topLevelModules.add(module);
         }
+        return topLevelModules;
     }
 
     private void checkIfShouldGenerateDeploymentDescriptor(FileCopyDetails details) {
