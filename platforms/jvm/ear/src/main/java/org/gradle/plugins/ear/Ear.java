@@ -139,9 +139,12 @@ public abstract class Ear extends Jar {
         if (deploymentDescriptor != null && details.getPath().lastIndexOf("/") <= 0) {
             EarModule module;
             if (details.getPath().toLowerCase(Locale.ROOT).endsWith(".war")) {
-                module = new DefaultEarWebModule(details.getPath(), details.getPath().substring(0, details.getPath().lastIndexOf(".")));
+                module = getObjectFactory().newInstance(DefaultEarWebModule.class);
+                ((DefaultEarWebModule) module).setContextRoot(details.getPath().substring(0, details.getPath().lastIndexOf(".")));
+                module.getPath().set(details.getPath());
             } else {
-                module = new DefaultEarModule(details.getPath());
+                module = getObjectFactory().newInstance(DefaultEarModule.class);
+                module.getPath().set(details.getPath());
             }
 
             topLevelModules.add(module);

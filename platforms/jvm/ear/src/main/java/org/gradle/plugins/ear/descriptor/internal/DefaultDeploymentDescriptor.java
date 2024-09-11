@@ -109,18 +109,23 @@ public abstract class DefaultDeploymentDescriptor implements DeploymentDescripto
     @Override
     public DefaultDeploymentDescriptor module(EarModule module, String type) {
         getModules().add(module);
-        getModuleTypeMappings().put(module.getPath(), type);
+        getModuleTypeMappings().put(module.getPath().get(), type);
         return this;
     }
 
     @Override
     public DefaultDeploymentDescriptor module(String path, String type) {
-        return module(new DefaultEarModule(path), type);
+        DefaultEarModule module = objectFactory.newInstance(DefaultEarModule.class);
+        module.getPath().set(path);
+        return module(module, type);
     }
 
     @Override
     public DefaultDeploymentDescriptor webModule(String path, String contextRoot) {
-        getModules().add(new DefaultEarWebModule(path, contextRoot));
+        DefaultEarWebModule module = objectFactory.newInstance(DefaultEarWebModule.class);
+        module.setContextRoot(contextRoot);
+        module.getPath().set(path);
+        getModules().add(module);
         getModuleTypeMappings().put(path, "web");
         return this;
     }
@@ -232,16 +237,17 @@ public abstract class DefaultDeploymentDescriptor implements DeploymentDescripto
                             if (moduleNodeLocalName.equals("web")) {
                                 String webUri = childNodeText(moduleNode, "web-uri");
                                 String contextRoot = childNodeText(moduleNode, "context-root");
-                                module = new DefaultEarWebModule(webUri, contextRoot);
+                                module = newDefaultEarWebModule(webUri, contextRoot);
                                 getModules().add(module);
-                                getModuleTypeMappings().put(module.getPath(), "web");
+                                getModuleTypeMappings().put(module.getPath().get(), "web");
                             } else if (moduleNodeLocalName.equals("alt-dd")) {
                                 assert module != null;
-                                module.setAltDeployDescriptor(moduleNode.text());
+                                module.getAltDeployDescriptor().set(moduleNode.text());
                             } else {
-                                module = new DefaultEarModule(moduleNode.text());
+                                String path = moduleNode.text();
+                                module = newDefaultEarModule(path);
                                 getModules().add(module);
-                                getModuleTypeMappings().put(module.getPath(), moduleNodeLocalName);
+                                getModuleTypeMappings().put(path, moduleNodeLocalName);
                             }
                         }
 
@@ -271,6 +277,19 @@ public abstract class DefaultDeploymentDescriptor implements DeploymentDescripto
             IoActions.closeQuietly(reader);
         }
         return this;
+    }
+
+    private DefaultEarWebModule newDefaultEarWebModule(String path, String contextRoot) {
+        DefaultEarWebModule module = objectFactory.newInstance(DefaultEarWebModule.class);
+        module.getPath().set(path);
+        module.setContextRoot(contextRoot);
+        return module;
+    }
+
+    private DefaultEarModule newDefaultEarModule(String path) {
+        DefaultEarModule module = objectFactory.newInstance(DefaultEarModule.class);
+        module.getPath().set(path);
+        return module;
     }
 
     private static String childNodeText(Node root, String name) {
@@ -336,10 +355,10 @@ public abstract class DefaultDeploymentDescriptor implements DeploymentDescripto
         }
         for (EarSecurityRole role : getSecurityRoles().get()) {
             Node roleNode = new Node(root, nodeNameFor("security-role"));
-            if (role.getDescription() != null) {
-                new Node(roleNode, nodeNameFor("description"), role.getDescription());
+            if (role.getDescription().isPresent()) {
+                new Node(roleNode, nodeNameFor("description"), role.getDescription().get());
             }
-            new Node(roleNode, nodeNameFor("role-name"), role.getRoleName());
+            new Node(roleNode, nodeNameFor("role-name"), role.getRoleName().get());
         }
         if (getLibraryDirectory().isPresent()) {
             new Node(root, nodeNameFor("library-directory"), getLibraryDirectory().get());
@@ -348,7 +367,7 @@ public abstract class DefaultDeploymentDescriptor implements DeploymentDescripto
     }
 
     private Object moduleNameFor(EarModule module) {
-        String name = getModuleTypeMappings().get().get(module.getPath());
+        String name = getModuleTypeMappings().get().get(module.getPath().get());
         if (name == null) {
             if (module instanceof EarWebModule) {
                 name = "web";
