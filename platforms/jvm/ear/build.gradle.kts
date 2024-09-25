@@ -16,14 +16,14 @@ dependencies {
     api(libs.inject)
 
     api(projects.baseServices)
+    api(projects.stdlibJavaExtensions)
     api(projects.coreApi)
+    api(projects.core)
     api(projects.languageJvm)
     api(projects.modelCore)
     api(projects.platformJvm)
 
     implementation(projects.serviceLookup)
-    implementation(projects.stdlibJavaExtensions)
-    implementation(projects.core)
     implementation(projects.fileOperations)
     implementation(projects.dependencyManagement)
     implementation(projects.execution)

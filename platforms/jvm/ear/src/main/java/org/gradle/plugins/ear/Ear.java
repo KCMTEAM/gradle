@@ -35,6 +35,7 @@ import org.gradle.api.tasks.bundling.Jar;
 import org.gradle.internal.execution.OutputChangeListener;
 import org.gradle.internal.instrumentation.api.annotations.NotToBeReplacedByLazyProperty;
 import org.gradle.internal.instrumentation.api.annotations.ReplacesEagerProperty;
+import org.gradle.internal.xml.XmlTransformer;
 import org.gradle.plugins.ear.descriptor.DeploymentDescriptor;
 import org.gradle.plugins.ear.descriptor.EarModule;
 import org.gradle.plugins.ear.descriptor.internal.DefaultDeploymentDescriptor;
@@ -55,6 +56,7 @@ import static java.util.Collections.singleton;
 import static org.gradle.api.internal.lambdas.SerializableLambdas.action;
 import static org.gradle.api.internal.lambdas.SerializableLambdas.callable;
 import static org.gradle.plugins.ear.EarPlugin.DEFAULT_LIB_DIR_NAME;
+import static org.gradle.plugins.ear.descriptor.internal.DeploymentDescriptorXmlWriter.writeDeploymentDescriptor;
 
 /**
  * Assembles an EAR archive.
@@ -109,10 +111,8 @@ public abstract class Ear extends Jar {
                     action(outputStream -> {
                             // delay obtaining contents to account for descriptor changes
                             // (for instance, due to modules discovered)
-                            // We copy the descriptor since properties are already finalized at that moment with cc
-                            DeploymentDescriptor copyDescriptor = getObjectFactory().newInstance(DefaultDeploymentDescriptor.class).copyFrom(descriptor);
-                            copyDescriptor.getModules().addAll(topLevelModules.get());
-                            copyDescriptor.writeTo(new OutputStreamWriter(outputStream));
+                            Set<EarModule> modules = Sets.union(descriptor.getModules().get(), topLevelModules.get());
+                            writeDeploymentDescriptor(descriptor, modules, new XmlTransformer(), new OutputStreamWriter(outputStream));
                         }
                     )
                 );
