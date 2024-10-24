@@ -1,0 +1,12 @@
+{
+    "acceptedApiChanges": [
+        {
+            "type": "org.gradle.api.artifacts.repositories.UrlArtifactRepository",
+            "member": "Method org.gradle.api.artifacts.repositories.UrlArtifactRepository.setUrl(java.lang.Object)",
+            "acceptation": "Not worth preserving",
+            "changes": [
+                "Method has been removed"
+            ]
+        }
+    ]
+}
