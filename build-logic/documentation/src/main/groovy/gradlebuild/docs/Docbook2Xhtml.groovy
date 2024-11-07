@@ -129,7 +129,7 @@ abstract class Docbook2Xhtml extends SourceTask {
                     args fvd.file.absolutePath
                     args outFile.absolutePath
                     args destDir.absolutePath
-                    jvmArgs '-Xmx1024m'
+                    jvmArgs('-Xmx1024m')
                     classpath = xslClasspath
                     systemProperty 'xslthl.config', xslthlConfigFile
                     systemProperty 'org.apache.xerces.xni.parser.XMLParserConfiguration', 'org.apache.xerces.parsers.XIncludeParserConfiguration'

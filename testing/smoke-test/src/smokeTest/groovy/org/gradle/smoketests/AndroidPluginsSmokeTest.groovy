@@ -101,7 +101,6 @@ class AndroidPluginsSmokeTest extends AbstractPluginValidatingSmokeTest implemen
             'connectedDebugAndroidTest',
             "-Pandroid.injected.invoked.from.ide=$ide"
         )
-
         when: 'first build'
         SantaTrackerConfigurationCacheWorkaround.beforeBuild(runner.projectDir, IntegrationTestBuildContext.INSTANCE.gradleUserHomeDir)
         def result = runner.build()
@@ -346,23 +345,23 @@ class AndroidPluginsSmokeTest extends AbstractPluginValidatingSmokeTest implemen
 
         """
             android {
-                compileSdkVersion 30
-                buildToolsVersion "${TestedVersions.androidTools}"
+                compileSdkVersion = 30
+                buildToolsVersion = "${TestedVersions.androidTools}"
 
-                namespace "${appPackage}"
+                namespace = "${appPackage}"
                 defaultConfig {
-                    minSdkVersion 22
-                    targetSdkVersion 26
-                    versionCode 1
-                    versionName "1.0"
+                    minSdkVersion = 22
+                    targetSdkVersion = 26
+                    versionCode = 1
+                    versionName = "1.0"
                 }
                 compileOptions {
-                    sourceCompatibility JavaVersion.${targetJvm.name()}
-                    targetCompatibility JavaVersion.${targetJvm.name()}
+                    sourceCompatibility = JavaVersion.${targetJvm.name()}
+                    targetCompatibility = JavaVersion.${targetJvm.name()}
                 }
                 buildTypes {
                     release {
-                        minifyEnabled false
+                        minifyEnabled = false
                     }
                 }
             }

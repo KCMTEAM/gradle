@@ -480,8 +480,8 @@ class ResolutionIssuesIntegrationTest extends AbstractIntegrationSpec {
             }
 
             android {
-                namespace 'org.zephyrsoft.trackworktime'
-                compileSdkVersion 33
+                namespace = 'org.zephyrsoft.trackworktime'
+                compileSdkVersion = 33
             }
 
             dependencies {

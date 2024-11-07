@@ -24,6 +24,7 @@ import org.gradle.test.fixtures.file.TestNameTestDirectoryProvider
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.TaskOutcome
 import org.gradle.testkit.runner.internal.ToolingApiGradleExecutor
+import org.gradle.util.GradleVersion
 import org.junit.Rule
 
 /**
@@ -105,6 +106,18 @@ class AbstractAndroidSantaTrackerSmokeTest extends AbstractSmokeTest implements 
                 "--add-opens", "jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED"
             )
         }
+        runner.expectLegacyDeprecationWarning(
+            "Space-assignment syntax in Groovy DSL has been deprecated. " +
+                "This is scheduled to be removed in Gradle 10.0. " +
+                "Use assignment ('url = <value>') or explicit setter instead. " +
+                "Consult the upgrading guide for further information: https://docs.gradle.org/${GradleVersion.current().version}/userguide/upgrading_version_8.html#groovy_space_assignment_syntax"
+        )
+        runner.expectLegacyDeprecationWarning(
+            "Space-assignment syntax in Groovy DSL has been deprecated. " +
+                "This is scheduled to be removed in Gradle 10.0. " +
+                "Use assignment ('namespace = <value>') or explicit setter instead. " +
+                "Consult the upgrading guide for further information: https://docs.gradle.org/${GradleVersion.current().version}/userguide/upgrading_version_8.html#groovy_space_assignment_syntax"
+        )
         runner
     }
 
