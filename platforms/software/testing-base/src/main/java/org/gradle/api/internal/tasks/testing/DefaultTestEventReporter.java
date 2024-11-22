@@ -75,6 +75,12 @@ public class DefaultTestEventReporter implements TestEventReporter {
         processor.output(testDescriptor.getId(), new DefaultTestOutputEvent(logTime.toEpochMilli(), destination, output));
     }
 
+    @Override
+    public void metadata(@Nullable Instant logTime, String key, Object value) {
+        requireRunning();
+        processor.metadata(testDescriptor.getId(), new DefaultTestMetadataEvent(logTime == null ? null : logTime.toEpochMilli(), key, value));
+    }
+
     private void markCompleted() {
         requireRunning();
         state = State.COMPLETED;
