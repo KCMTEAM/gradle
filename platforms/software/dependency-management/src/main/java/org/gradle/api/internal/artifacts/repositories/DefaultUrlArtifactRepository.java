@@ -20,12 +20,10 @@ import org.gradle.api.InvalidUserCodeException;
 import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.artifacts.repositories.UrlArtifactRepository;
 import org.gradle.api.internal.file.FileResolver;
-import org.gradle.api.internal.provider.ProviderApiDeprecationLogger;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.Property;
+import org.gradle.api.provider.ProviderFactory;
 import org.gradle.internal.deprecation.Documentation;
-import org.gradle.internal.instrumentation.api.annotations.BytecodeUpgrade;
-import org.gradle.internal.instrumentation.api.annotations.ReplacesEagerProperty;
 import org.gradle.internal.verifier.HttpRedirectVerifier;
 import org.gradle.internal.verifier.HttpRedirectVerifierFactory;
 
@@ -42,14 +40,17 @@ public class DefaultUrlArtifactRepository implements UrlArtifactRepository {
     private final String repositoryType;
     private final FileResolver fileResolver;
     private final Supplier<String> displayNameSupplier;
+    private final ProviderFactory providers;
 
     DefaultUrlArtifactRepository(
         final FileResolver fileResolver,
         final ObjectFactory objectFactory,
+        final ProviderFactory providers,
         final String repositoryType,
         final Supplier<String> displayNameSupplier
     ) {
         this.fileResolver = fileResolver;
+        this.providers = providers;
         this.repositoryType = repositoryType;
         this.displayNameSupplier = displayNameSupplier;
         this.url = objectFactory.property(URI.class);
@@ -57,13 +58,19 @@ public class DefaultUrlArtifactRepository implements UrlArtifactRepository {
     }
 
     @Override
-    @ReplacesEagerProperty(adapter = UrlAdapter.class)
     public Property<URI> getUrl() {
         return url;
     }
 
     @Override
-    @ReplacesEagerProperty(originalType = boolean.class)
+    @Deprecated
+    public void setUrl(Object url) {
+        // TODO: fix it in 9.0
+        // ProviderApiDeprecationLogger.logDeprecation(UrlArtifactRepository.class, "setUrl(Object)", "getUrl");
+        this.getUrl().set(providers.provider(() -> fileResolver.resolveUri(url)));
+    }
+
+    @Override
     public Property<Boolean> getAllowInsecureProtocol() {
         return allowInsecureProtocol;
     }
@@ -111,7 +118,7 @@ public class DefaultUrlArtifactRepository implements UrlArtifactRepository {
         return HttpRedirectVerifierFactory
             .create(
                 uri,
-                allowInsecureProtocol.get(),
+                getAllowInsecureProtocol().get(),
                 this::throwExceptionDueToInsecureProtocol,
                 redirection -> throwExceptionDueToInsecureRedirect(uri, redirection)
             );
@@ -120,28 +127,17 @@ public class DefaultUrlArtifactRepository implements UrlArtifactRepository {
     public static class Factory {
         private final FileResolver fileResolver;
         private final ObjectFactory objectFactory;
+        private final ProviderFactory providers;
 
         @Inject
-        public Factory(FileResolver fileResolver, ObjectFactory objectFactory) {
+        public Factory(FileResolver fileResolver, ObjectFactory objectFactory, ProviderFactory providers) {
             this.fileResolver = fileResolver;
             this.objectFactory = objectFactory;
+            this.providers = providers;
         }
 
         DefaultUrlArtifactRepository create(String repositoryType, Supplier<String> displayNameSupplier) {
-            return new DefaultUrlArtifactRepository(fileResolver, objectFactory, repositoryType, displayNameSupplier);
-        }
-    }
-
-    static class UrlAdapter {
-        @BytecodeUpgrade
-        static URI getUrl(DefaultUrlArtifactRepository repository) {
-            return repository.getUrl().get();
-        }
-
-        @BytecodeUpgrade
-        static void setUrl(DefaultUrlArtifactRepository repository, Object url) {
-            ProviderApiDeprecationLogger.logDeprecation(UrlArtifactRepository.class, "setUrl(Object)", "getUrl");
-            repository.getUrl().set(repository.fileResolver.resolveUri(url));
+            return new DefaultUrlArtifactRepository(fileResolver, objectFactory, providers, repositoryType, displayNameSupplier);
         }
     }
 }

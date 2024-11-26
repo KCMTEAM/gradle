@@ -197,7 +197,7 @@ public class DefaultIvyArtifactRepository extends AbstractAuthenticationSupporte
     private Set<String> getSchemes() {
         if (schemes == null) {
             URI uri = getUrl().getOrNull();
-            if (uri != null && uri.getScheme() == null){
+            if (uri != null && uri.getScheme() == null) {
                 throw new InvalidUserDataException("Repository URL must have a scheme: '" + uri + "'. If you are using a local repository, please use 'file()' or derive it from project.layout.");
             }
             // use a local variable to prepare the set,
@@ -255,7 +255,6 @@ public class DefaultIvyArtifactRepository extends AbstractAuthenticationSupporte
     }
 
     @Override
-    @ReplacesEagerProperty(adapter = UrlAdapter.class)
     public Property<URI> getUrl() {
         return urlArtifactRepository.getUrl();
     }
@@ -263,9 +262,7 @@ public class DefaultIvyArtifactRepository extends AbstractAuthenticationSupporte
     @Override
     @Deprecated
     public void setUrl(Object url) {
-        // TODO: fix it in 9.0
-        // ProviderApiDeprecationLogger.logDeprecation(MavenArtifactRepository.class, "setUrl(Object) configuration with `url Object` syntax", "getUrl");
-        getUrl().set(providerFactory.provider(() -> fileResolver.resolveUri(url)));
+        urlArtifactRepository.setUrl(url);
     }
 
     @Override

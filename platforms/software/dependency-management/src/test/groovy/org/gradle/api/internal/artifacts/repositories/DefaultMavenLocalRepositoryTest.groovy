@@ -46,7 +46,7 @@ class DefaultMavenLocalRepositoryTest extends Specification {
     final AuthenticationContainer authenticationContainer = Stub()
     final FileResourceRepository fileResourceRepository = Mock()
     final MavenMutableModuleMetadataFactory mavenMetadataFactory = DependencyManagementTestUtil.mavenMetadataFactory()
-    final DefaultUrlArtifactRepository.Factory urlArtifactRepositoryFactory = new DefaultUrlArtifactRepository.Factory(resolver, TestUtil.objectFactory())
+    final DefaultUrlArtifactRepository.Factory urlArtifactRepositoryFactory = new DefaultUrlArtifactRepository.Factory(resolver, TestUtil.objectFactory(), TestUtil.providerFactory())
 
     final DefaultMavenArtifactRepository repository = createRepository()
 

@@ -61,6 +61,7 @@ public interface IvyArtifactRepository extends ArtifactRepository, UrlArtifactRe
      * @param url The base URL.
      * @deprecated use {@link #getUrl()} property instead.
      */
+    @Override
     @Deprecated
     void setUrl(Object url);
 

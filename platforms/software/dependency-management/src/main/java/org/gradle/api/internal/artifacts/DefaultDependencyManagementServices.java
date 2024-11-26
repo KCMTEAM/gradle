@@ -385,8 +385,8 @@ public class DefaultDependencyManagementServices implements DependencyManagement
         }
 
         @Provides
-        DefaultUrlArtifactRepository.Factory createDefaultUrlArtifactRepositoryFactory(FileResolver fileResolver, ObjectFactory objectFactory) {
-            return new DefaultUrlArtifactRepository.Factory(fileResolver, objectFactory);
+        DefaultUrlArtifactRepository.Factory createDefaultUrlArtifactRepositoryFactory(FileResolver fileResolver, ObjectFactory objectFactory, ProviderFactory providerFactory) {
+            return new DefaultUrlArtifactRepository.Factory(fileResolver, objectFactory, providerFactory);
         }
 
         @Provides

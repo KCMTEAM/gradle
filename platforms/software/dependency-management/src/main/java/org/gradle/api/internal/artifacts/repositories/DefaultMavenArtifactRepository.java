@@ -49,7 +49,6 @@ import org.gradle.api.internal.artifacts.repositories.resolver.VersionLister;
 import org.gradle.api.internal.artifacts.repositories.transport.RepositoryTransport;
 import org.gradle.api.internal.artifacts.repositories.transport.RepositoryTransportFactory;
 import org.gradle.api.internal.file.FileResolver;
-import org.gradle.api.internal.provider.ProviderApiDeprecationLogger;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.ProviderFactory;
@@ -65,7 +64,6 @@ import org.gradle.internal.component.external.model.maven.MutableMavenModuleReso
 import org.gradle.internal.component.model.ComponentOverrideMetadata;
 import org.gradle.internal.hash.ChecksumService;
 import org.gradle.internal.instantiation.InstantiatorFactory;
-import org.gradle.internal.instrumentation.api.annotations.BytecodeUpgrade;
 import org.gradle.internal.instrumentation.api.annotations.ReplacesEagerProperty;
 import org.gradle.internal.isolation.IsolatableFactory;
 import org.gradle.internal.reflect.Instantiator;
@@ -169,7 +167,6 @@ public class DefaultMavenArtifactRepository extends AbstractAuthenticationSuppor
     }
 
     @Override
-    @ReplacesEagerProperty(adapter = UrlAdapter.class)
     public Property<URI> getUrl() {
         return urlArtifactRepository.getUrl();
     }
@@ -177,9 +174,7 @@ public class DefaultMavenArtifactRepository extends AbstractAuthenticationSuppor
     @Override
     @Deprecated
     public void setUrl(Object url) {
-        // TODO: fix it in 9.0
-        // ProviderApiDeprecationLogger.logDeprecation(MavenArtifactRepository.class, "setUrl(Object) configuration with `url Object` syntax", "getUrl");
-        getUrl().set(providerFactory.provider(() -> fileResolver.resolveUri(url)));
+        urlArtifactRepository.setUrl(url);
     }
 
     @Override
@@ -445,19 +440,6 @@ public class DefaultMavenArtifactRepository extends AbstractAuthenticationSuppor
         @Override
         public void listModuleVersions(ModuleDependencyMetadata dependency, ModuleIdentifier module, List<ResourcePattern> ivyPatterns, List<ResourcePattern> artifactPatterns, VersionLister versionLister, BuildableModuleVersionListingResolveResult result) {
             delegate.listModuleVersions(dependency, module, ivyPatterns, artifactPatterns, versionLister, result);
-        }
-    }
-
-    static class UrlAdapter {
-        @BytecodeUpgrade
-        static URI getUrl(DefaultMavenArtifactRepository repository) {
-            return repository.getUrl().get();
-        }
-
-        @BytecodeUpgrade
-        static void setUrl(DefaultMavenArtifactRepository repository, Object url) {
-            ProviderApiDeprecationLogger.logDeprecation(MavenArtifactRepository.class, "setUrl(Object)", "getUrl");
-            repository.getUrl().set(repository.providerFactory.provider(() -> repository.fileResolver.resolveUri(url)));
         }
     }
 }

@@ -46,6 +46,7 @@ public interface MavenArtifactRepository extends ArtifactRepository, UrlArtifact
      * @since 4.0
      * @deprecated Use {@link #getUrl()} property instead.
      */
+    @Override
     @Deprecated
     void setUrl(Object url);
 

@@ -61,7 +61,7 @@ class DefaultIvyArtifactRepositoryTest extends Specification {
     final ImmutableModuleIdentifierFactory moduleIdentifierFactory = Mock()
     final GradleModuleMetadataParser moduleMetadataParser = new GradleModuleMetadataParser(Mock(AttributesFactory), moduleIdentifierFactory, Mock(NamedObjectInstantiator))
     final IvyMutableModuleMetadataFactory metadataFactory = DependencyManagementTestUtil.ivyMetadataFactory()
-    final DefaultUrlArtifactRepository.Factory urlArtifactRepositoryFactory = new DefaultUrlArtifactRepository.Factory(fileResolver, TestUtil.objectFactory())
+    final DefaultUrlArtifactRepository.Factory urlArtifactRepositoryFactory = new DefaultUrlArtifactRepository.Factory(fileResolver, TestUtil.objectFactory(), TestUtil.providerFactory())
     final ProviderFactory providerFactory = Mock()
 
     final DefaultIvyArtifactRepository repository = newRepo()

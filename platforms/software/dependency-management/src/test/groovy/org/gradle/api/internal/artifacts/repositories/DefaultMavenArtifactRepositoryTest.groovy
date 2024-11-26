@@ -55,7 +55,7 @@ class DefaultMavenArtifactRepositoryTest extends Specification {
     final GradleModuleMetadataParser metadataParser = Stub()
     final AuthenticationContainer authenticationContainer = Stub()
     final MavenMutableModuleMetadataFactory mavenMetadataFactory = DependencyManagementTestUtil.mavenMetadataFactory()
-    final DefaultUrlArtifactRepository.Factory urlArtifactRepositoryFactory = new DefaultUrlArtifactRepository.Factory(resolver, TestUtil.objectFactory())
+    final DefaultUrlArtifactRepository.Factory urlArtifactRepositoryFactory = new DefaultUrlArtifactRepository.Factory(resolver, TestUtil.objectFactory(), TestUtil.providerFactory())
     final ProviderFactory providerFactory = Mock()
 
     final DefaultMavenArtifactRepository repository = newRepo()

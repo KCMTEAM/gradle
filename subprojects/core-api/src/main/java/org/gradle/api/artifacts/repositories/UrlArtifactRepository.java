@@ -16,6 +16,7 @@
 
 package org.gradle.api.artifacts.repositories;
 
+import org.gradle.api.internal.provider.ProviderApiDeprecationLogger;
 import org.gradle.api.provider.Property;
 import org.gradle.internal.instrumentation.api.annotations.ReplacesEagerProperty;
 
@@ -35,6 +36,14 @@ public interface UrlArtifactRepository {
     Property<URI> getUrl();
 
     /**
+     * Sets the base URL of this repository.
+     *
+     * @param url The base URL.
+     */
+    @Deprecated
+    void setUrl(Object url);
+
+    /**
      * Specifies whether it is acceptable to communicate with a repository over an insecure HTTP connection.
      * <p>
      * For security purposes this intentionally requires a user to opt-in to using insecure protocols on case by case basis.
@@ -51,4 +60,13 @@ public interface UrlArtifactRepository {
      */
     @ReplacesEagerProperty(originalType = boolean.class)
     Property<Boolean> getAllowInsecureProtocol();
+
+    /**
+     * Added for Kotlin source compatibility.
+     */
+    @Deprecated
+    default Property<Boolean> getIsAllowInsecureProtocol() {
+        ProviderApiDeprecationLogger.logDeprecation(UrlArtifactRepository.class, "getIsAllowInsecureProtocol()", "getAllowInsecureProtocol()");
+        return getAllowInsecureProtocol();
+    }
 }

@@ -989,18 +989,9 @@ public class AsmBackedClassGenerator extends AbstractClassGenerator {
             }
 
             // TODO: fix/remove in 9.0
-            if (getter.getReturnType().equals(Property.class)) {
-                @SuppressWarnings("unchecked")
-                TypeToken<Property<?>> typeToken = (TypeToken<Property<?>>) TypeToken.of(getter.getGenericReturnType());
-                Class<?> nestedType = JavaReflectionUtil.extractNestedType(typeToken, Property.class, 0).getRawType();
-                if (
-                    nestedType.equals(URI.class)
-                        && property
-                        .getOverridableSetters().stream()
-                        .anyMatch(setter -> setter.getParameterCount() == 1 && setter.getParameterTypes()[0].equals(Object.class) && setter.getReturnType().equals(Void.TYPE))
-                ) {
-                    return;
-                }
+            if (isLazyUriPropertyWithSetObject(property, getter)) {
+                // For Property<URI> we allow keeping set<Name>(Object) if exists for now
+                return;
             }
             // GENERATE public void set<Name>(Object p) {
             //    ((LazyGroovySupport)<getter>()).setFromAnyValue(p);
@@ -1012,6 +1003,20 @@ public class AsmBackedClassGenerator extends AbstractClassGenerator {
                 _ALOAD(1);
                 _INVOKEINTERFACE(LAZY_GROOVY_SUPPORT_TYPE, "setFromAnyValue", ClassBuilderImpl.RETURN_VOID_FROM_OBJECT);
             }});
+        }
+
+        private static boolean isLazyUriPropertyWithSetObject(PropertyMetadata property, MethodMetadata getter) {
+            if (getter.getReturnType().equals(Property.class)) {
+                @SuppressWarnings("unchecked")
+                TypeToken<Property<?>> typeToken = (TypeToken<Property<?>>) TypeToken.of(getter.getGenericReturnType());
+                Class<?> nestedType = JavaReflectionUtil.extractNestedType(typeToken, Property.class, 0).getRawType();
+                return nestedType.equals(URI.class) && property.getOverridableSetters().stream().anyMatch(ClassBuilderImpl::isSetObjectSetter);
+            }
+            return false;
+        }
+
+        private static boolean isSetObjectSetter(Method setter) {
+            return setter.getParameterCount() == 1 && setter.getParameterTypes()[0].equals(Object.class) && setter.getReturnType().equals(Void.TYPE);
         }
 
         /**
