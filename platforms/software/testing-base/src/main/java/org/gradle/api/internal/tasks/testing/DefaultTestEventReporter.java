@@ -16,6 +16,7 @@
 
 package org.gradle.api.internal.tasks.testing;
 
+import com.google.common.base.Preconditions;
 import org.gradle.api.NonNullApi;
 import org.gradle.api.tasks.VerificationException;
 import org.gradle.api.tasks.testing.TestEventReporter;
@@ -76,9 +77,10 @@ public class DefaultTestEventReporter implements TestEventReporter {
     }
 
     @Override
-    public void metadata(@Nullable Instant logTime, String key, Object value) {
+    public void metadata(Instant logTime, String key, Object value) {
+        Preconditions.checkNotNull(logTime, "logTime can not be null!");
         requireRunning();
-        processor.metadata(testDescriptor.getId(), new DefaultTestMetadataEvent(logTime == null ? null : logTime.toEpochMilli(), key, value));
+        processor.metadata(testDescriptor.getId(), new DefaultTestMetadataEvent(logTime.toEpochMilli(), key, value));
     }
 
     private void markCompleted() {
