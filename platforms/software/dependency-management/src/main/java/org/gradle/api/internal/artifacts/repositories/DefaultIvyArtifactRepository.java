@@ -53,7 +53,6 @@ import org.gradle.api.internal.artifacts.repositories.resolver.IvyResolver;
 import org.gradle.api.internal.artifacts.repositories.transport.RepositoryTransport;
 import org.gradle.api.internal.artifacts.repositories.transport.RepositoryTransportFactory;
 import org.gradle.api.internal.file.FileResolver;
-import org.gradle.api.internal.provider.ProviderApiDeprecationLogger;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.ProviderFactory;
@@ -63,7 +62,6 @@ import org.gradle.internal.component.external.model.ModuleComponentArtifactMetad
 import org.gradle.internal.component.external.model.ivy.MutableIvyModuleResolveMetadata;
 import org.gradle.internal.hash.ChecksumService;
 import org.gradle.internal.instantiation.InstantiatorFactory;
-import org.gradle.internal.instrumentation.api.annotations.BytecodeUpgrade;
 import org.gradle.internal.instrumentation.api.annotations.ReplacesEagerProperty;
 import org.gradle.internal.isolation.IsolatableFactory;
 import org.gradle.internal.reflect.Instantiator;
@@ -511,20 +509,6 @@ public class DefaultIvyArtifactRepository extends AbstractAuthenticationSupporte
         @Override
         public boolean isIgnoreGradleMetadataRedirectionEnabled() {
             return ignoreGradleMetadataRedirection;
-        }
-    }
-
-    static class UrlAdapter {
-        @BytecodeUpgrade
-        @Nullable
-        static URI getUrl(DefaultIvyArtifactRepository repository) {
-            return repository.getUrl().getOrNull();
-        }
-
-        @BytecodeUpgrade
-        static void setUrl(DefaultIvyArtifactRepository repository, Object url) {
-            ProviderApiDeprecationLogger.logDeprecation(IvyArtifactRepository.class, "setUrl(Object)", "getUrl");
-            repository.getUrl().set(repository.providerFactory.provider(() -> repository.fileResolver.resolveUri(url)));
         }
     }
 }
