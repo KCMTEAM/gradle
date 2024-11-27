@@ -172,7 +172,6 @@ public class DefaultMavenArtifactRepository extends AbstractAuthenticationSuppor
     }
 
     @Override
-    @Deprecated
     public void setUrl(Object url) {
         urlArtifactRepository.setUrl(url);
     }

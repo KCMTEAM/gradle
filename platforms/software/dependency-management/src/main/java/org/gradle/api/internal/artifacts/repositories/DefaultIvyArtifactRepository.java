@@ -258,7 +258,6 @@ public class DefaultIvyArtifactRepository extends AbstractAuthenticationSupporte
     }
 
     @Override
-    @Deprecated
     public void setUrl(Object url) {
         urlArtifactRepository.setUrl(url);
     }

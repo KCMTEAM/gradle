@@ -27,7 +27,6 @@ class RepositoryHandlerExtensionsTest {
             maven(url = url)
         }
 
-        @Suppress("DEPRECATION")
         verify(repository, only()).setUrl(url)
     }
 
@@ -40,7 +39,6 @@ class RepositoryHandlerExtensionsTest {
         val url = Any()
         repositories {
             maven(url = url) {
-                @Suppress("DEPRECATION")
                 verify(repository).setUrl(url)
                 name = "repo name"
             }
@@ -60,7 +58,6 @@ class RepositoryHandlerExtensionsTest {
             ivy(url = url)
         }
 
-        @Suppress("DEPRECATION")
         verify(repository, only()).setUrl(url)
     }
 
@@ -73,7 +70,6 @@ class RepositoryHandlerExtensionsTest {
         val url = Any()
         repositories {
             ivy(url = url) {
-                @Suppress("DEPRECATION")
                 verify(repository).setUrl(url)
                 name = "repo name"
             }

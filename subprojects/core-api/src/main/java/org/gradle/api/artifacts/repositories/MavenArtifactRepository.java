@@ -18,8 +18,8 @@ package org.gradle.api.artifacts.repositories;
 import org.gradle.api.Action;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.SetProperty;
-import org.gradle.internal.instrumentation.api.annotations.ReplacesEagerProperty;
 import org.gradle.declarative.dsl.model.annotations.Restricted;
+import org.gradle.internal.instrumentation.api.annotations.ReplacesEagerProperty;
 
 import java.net.URI;
 
@@ -44,10 +44,8 @@ public interface MavenArtifactRepository extends ArtifactRepository, UrlArtifact
      *
      * @param url The base URL.
      * @since 4.0
-     * @deprecated Use {@link #getUrl()} property instead.
      */
     @Override
-    @Deprecated
     void setUrl(Object url);
 
     /**

@@ -22,6 +22,7 @@ import org.gradle.api.artifacts.repositories.UrlArtifactRepository;
 import org.gradle.api.internal.file.FileResolver;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.Property;
+import org.gradle.api.provider.Provider;
 import org.gradle.api.provider.ProviderFactory;
 import org.gradle.internal.deprecation.Documentation;
 import org.gradle.internal.verifier.HttpRedirectVerifier;
@@ -62,12 +63,21 @@ public class DefaultUrlArtifactRepository implements UrlArtifactRepository {
         return url;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    @Deprecated
     public void setUrl(Object url) {
-        // TODO: fix it in 9.0
+        // TODO: Handle deprecation in 9.0
         // ProviderApiDeprecationLogger.logDeprecation(UrlArtifactRepository.class, "setUrl(Object)", "getUrl");
-        this.getUrl().set(providers.provider(() -> fileResolver.resolveUri(url)));
+        if (url instanceof URI) {
+            this.getUrl().set((URI) url);
+        } else if (url instanceof Provider) {
+            this.getUrl().set(((Provider<Object>) url).map(uri -> uri instanceof URI
+                ? (URI) uri
+                : fileResolver.resolveUri(uri)
+            ));
+        } else {
+            this.getUrl().set(providers.provider(() -> fileResolver.resolveUri(url)));
+        }
     }
 
     @Override

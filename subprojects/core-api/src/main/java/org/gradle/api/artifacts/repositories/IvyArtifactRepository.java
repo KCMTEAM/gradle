@@ -59,10 +59,8 @@ public interface IvyArtifactRepository extends ArtifactRepository, UrlArtifactRe
      * File are resolved based on the supplied URL and the configured {@link #layout(String)} for this repository.
      *
      * @param url The base URL.
-     * @deprecated use {@link #getUrl()} property instead.
      */
     @Override
-    @Deprecated
     void setUrl(Object url);
 
     /**

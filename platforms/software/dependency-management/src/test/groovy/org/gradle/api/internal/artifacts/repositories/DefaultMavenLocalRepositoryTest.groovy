@@ -79,7 +79,7 @@ class DefaultMavenLocalRepositoryTest extends Specification {
 
         and:
         repository.name = 'repo'
-        repository.getUrl().set(uri)
+        repository.url = uri
 
         when:
         def repo = repository.createResolver()

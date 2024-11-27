@@ -28,6 +28,7 @@ public abstract class AbstractResolutionAwareArtifactRepository<T extends Reposi
 
     @Override
     final public T getDescriptor() {
+        // TODO: Gradle 9.0, check if we need caching
         //FIXME: should be cached, but we need to make sure it's invalidated when the repository changes
         //Currently, it's not possible to wire an action on property change
         return createDescriptor();

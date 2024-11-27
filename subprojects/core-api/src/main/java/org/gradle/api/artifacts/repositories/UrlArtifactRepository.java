@@ -40,7 +40,6 @@ public interface UrlArtifactRepository {
      *
      * @param url The base URL.
      */
-    @Deprecated
     void setUrl(Object url);
 
     /**

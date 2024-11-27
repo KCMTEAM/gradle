@@ -68,7 +68,7 @@ class DefaultMavenArtifactRepositoryTest extends Specification {
 
         and:
         repository.name = 'repo'
-        repository.getUrl().set(uri)
+        repository.url = uri
 
         when:
         def repo = repository.createResolver()
@@ -85,7 +85,7 @@ class DefaultMavenArtifactRepositoryTest extends Specification {
 
         and:
         repository.name = 'repo'
-        repository.getUrl().set(uri)
+        repository.url = uri
 
         when:
         def repo = repository.createResolver()
@@ -107,7 +107,7 @@ class DefaultMavenArtifactRepositoryTest extends Specification {
 
         and:
         repository.name = 'repo'
-        repository.getUrl().set(uri)
+        repository.url = uri
         repository.artifactUrls('repo1', 'repo2')
 
         when:
@@ -129,7 +129,7 @@ class DefaultMavenArtifactRepositoryTest extends Specification {
 
         and:
         repository.name = 'repo'
-        repository.getUrl().set(uri)
+        repository.url = uri
 
         when:
         def repo = repository.createResolver()
@@ -156,7 +156,7 @@ class DefaultMavenArtifactRepositoryTest extends Specification {
 
         and:
         repository.name = 'repo'
-        repository.getUrl().set(uri)
+        repository.url = uri
 
         when:
         def repo = repository.createResolver()
@@ -168,7 +168,7 @@ class DefaultMavenArtifactRepositoryTest extends Specification {
 
     def "can set a custom metadata rule"() {
         repository.name = 'name'
-        repository.getUrl().set(URI.create('https://host/'))
+        repository.url = URI.create('https://host/')
         transportFactory.createTransport('https', 'name', _, _) >> transport()
 
         given:
@@ -185,7 +185,7 @@ class DefaultMavenArtifactRepositoryTest extends Specification {
 
     def "can inject configuration into a custom metadata rule"() {
         repository.name = 'name'
-        repository.getUrl().set(URI.create('https://host/'))
+        repository.url = URI.create('https://host/')
         transportFactory.createTransport('https', 'name', _, _) >> transport()
 
         given:
@@ -202,7 +202,7 @@ class DefaultMavenArtifactRepositoryTest extends Specification {
 
     def "can set a custom version lister"() {
         repository.name = 'name'
-        repository.getUrl().set(URI.create('https://host/'))
+        repository.url = URI.create('https://host/')
         transportFactory.createTransport('https', 'name', _, _) >> transport()
 
         given:
@@ -218,7 +218,7 @@ class DefaultMavenArtifactRepositoryTest extends Specification {
 
     def "can inject configuration into a custom version lister"() {
         repository.name = 'name'
-        repository.getUrl().set(URI.create('https://host/'))
+        repository.url = URI.create('https://host/')
         transportFactory.createTransport('https', 'name', _, _) >> transport()
 
         given:
@@ -234,7 +234,7 @@ class DefaultMavenArtifactRepositoryTest extends Specification {
 
     def "can retrieve metadataSources"() {
         repository.name = 'name'
-        repository.getUrl().set(URI.create('https://host/'))
+        repository.url = URI.create('https://host/')
         transportFactory.createTransport('https', 'name', _, _) >> transport()
 
         given:
@@ -267,16 +267,16 @@ class DefaultMavenArtifactRepositoryTest extends Specification {
         _ * resolver.resolveUri(_) >> { URI uri -> uri }
 
         and:
-        repo.url.set(new URI("http://localhost"))
-        same.url.set(new URI("http://localhost"))
-        different.url.set(new URI("http://localhost/repo"))
+        repo.url = new URI("http://localhost")
+        same.url = new URI("http://localhost")
+        different.url = new URI("http://localhost/repo")
 
         expect:
         same.descriptor.id == repo.descriptor.id
         different.descriptor.id != repo.descriptor.id
 
         when:
-        different.url.set(new URI("http://localhost"))
+        different.url = new URI("http://localhost")
 
         then:
         different.descriptor.id == repo.descriptor.id
@@ -291,11 +291,11 @@ class DefaultMavenArtifactRepositoryTest extends Specification {
         _ * resolver.resolveUri(_) >> { URI uri -> uri }
 
         and:
-        repo.url.set(new URI("http://localhost"))
+        repo.url = new URI("http://localhost")
         repo.artifactUrls(new URI("http://localhost/dir"))
-        same.url.set(new URI("http://localhost"))
+        same.url = new URI("http://localhost")
         same.artifactUrls(new URI("http://localhost/dir"))
-        different.url.set(new URI("http://localhost"))
+        different.url = new URI("http://localhost")
 
         expect:
         same.descriptor.id == repo.descriptor.id
@@ -317,11 +317,11 @@ class DefaultMavenArtifactRepositoryTest extends Specification {
         _ * resolver.resolveUri(_) >> { URI uri -> uri }
 
         and:
-        repo.url.set(new URI("http://localhost"))
+        repo.url = new URI("http://localhost")
         source(repo)
-        same.url.set(new URI("http://localhost"))
+        same.url = new URI("http://localhost")
         source(same)
-        different.url.set( new URI("http://localhost"))
+        different.url = new URI("http://localhost")
 
         expect:
         same.descriptor.id == repo.descriptor.id
