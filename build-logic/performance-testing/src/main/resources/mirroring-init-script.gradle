@@ -69,14 +69,8 @@ class MirrorPlugin implements Plugin<Gradle> {
 
     void mirror(UrlArtifactRepository repo) {
         // TODO: Remove after Gradle 9.0
-        if (repo.url instanceof Property) {
-            def urlProperty = repo.url as Property<URI>
-            def oldUrl = urlProperty.get()
-            urlProperty.set(URI.create(mirrors.get(normalizeUrl(oldUrl), oldUrl.toString())))
-        } else {
-            def setter = UrlArtifactRepository.getMethod("setUrl", String)
-            setter.invoke(this, mirrors.get(normalizeUrl(repo.url), repo.url.toString()))
-        }
+        def oldUrl = repo.url instanceof Property ? (repo.url as Property<URI>).get() : repo.url
+        repo.url = mirrors.get(normalizeUrl(oldUrl), oldUrl.toString())
     }
 
     // We see them as equal:
